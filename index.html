@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Piedra Papel Tijera</title>
+
+    <style>
+      /* He creado el style para que el código sea más legibles y los estilos más accesibles en caso de querer cambiarlos, 
+        las clases han sido nombradas siguiendo la "metodologia" ya existente: class = "minusculaMayuscula" */
+
+      .txtResultado {
+        border: 1px dashed black;
+      }
+
+      .graficaBase {
+        width: 100%;
+        background: gray;
+        display: flex;
+        text-align: center;
+      }
+
+      .graficaAccion {
+        color: white;
+        width: 0%;
+        transition: width 1s;
+      }
+
+      .graficaGanadas {
+        background: red;
+      }
+
+      .graficaPerdidas {
+        background: blue;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button class="btnPiedra">Piedra ✊</button>
+    <button class="btnPapel">Papel ✋</button>
+    <button class="btnTijera">Tijera ✌</button>
+
+    <button class="btnReset">Reset</button>
+
+    <button class="btnAutoplay">AutoPlay</button>
+
+    <div class="txtResultado">
+      <p>Ganadas: <span id="ganadas">0</span></p>
+      <p>Perdidas: <span id="perdidas">0</span></p>
+      <p>Empatadas: <span id="empatadas">0</span></p>
+    </div>
+    <hr/>
+
+    <h2>Gráfica:</h2>
+    <div class="graficaBase">
+      <div class="graficaAccion graficaGanadas">Ganadas</div>
+      <div class="graficaAccion graficaPerdidas">Perdidas</div>
+    </div>
+    <hr/>
+
+    <h2>Stats:</h2>
+    <div class="txtStats"></div>
+    <hr/>
+
+    <script>
+      const txtGanadas = document.getElementById("ganadas");
+      const txtPerdidas = document.getElementById("perdidas");
+      const txtEmpatadas = document.getElementById("empatadas");
+
+      const txtResultado = document.querySelector(".txtResultado");
+      const txtStats = document.querySelector(".txtStats");
+
+      const gameScore = {
+        ganadas: 0,
+        perdidas: 0,
+        empatadas: 0,
+        stats: {
+          ai_piedra: 0,
+          ai_papel: 0,
+          ai_tijera: 0,
+          user_piedra: 0,
+          user_papel: 0,
+          user_tijera: 0,
+        },
+      };
+
+      const opciones = ["piedra", "papel", "tijera"];
+      const btnPiedra = document.querySelector(".btnPiedra");
+      const btnPapel = document.querySelector(".btnPapel");
+      const btnTijera = document.querySelector(".btnTijera");
+
+      btnPiedra.addEventListener("click", () => {
+        jugar("piedra");
+      });
+      btnPapel.addEventListener("click", () => {
+        jugar("papel");
+      });
+      btnTijera.addEventListener("click", () => {
+        jugar("tijera");
+      });
+
+      const btnAutoplay = document.querySelector(".btnAutoplay");
+      btnAutoplay.addEventListener("click", () => {
+        autoPlay();
+      });
+
+      const btnReset = document.querySelector(".btnReset");
+      btnReset.addEventListener("click", () => {
+        gameScore.ganadas = 0;
+        gameScore.perdidas = 0;
+        gameScore.empatadas = 0;
+        gameScore.stats = {
+          ai_piedra: 0,
+          ai_papel: 0,
+          ai_tijera: 0,
+          user_piedra: 0,
+          user_papel: 0,
+          user_tijera: 0,
+        };
+        showScore();
+        console.log("Juego reiniciado");
+      });
+
+      console.log("text body: ", document.body.innerText);
+
+
+      
+      /**Esta es la función más importante del código,
+       * (1) Dependiendo de los resultados de jugadorAI y el usuario, para determinar quien de los dos gana o si empatan
+       * La función evalua estos resultados a través de condicionales.
+       * (2) Actualiza las estadísticas de los jugadores (Stats)
+       * (3) Imprime un texto HTML con el resumen de la partida: el resultado (Score) y qué ha tirado cada jugador
+       */
+
+      const jugar = (usuario) => {
+        const jugadorAI = eleccionAI(); // devuelve piedra, papel o tijera
+
+        let resultado = "";
+
+        if (jugadorAI == usuario) {
+          console.log("Empate");
+          resultado = "Empate";
+        } else if (usuario == "piedra") {
+          if (jugadorAI == "papel") {
+            console.log("Perdiste");
+            resultado = "Perdiste";
+          } else {
+            console.log("Ganaste");
+            resultado = "Ganaste";
+          }
+        } else if (usuario == "papel") {
+          if (jugadorAI == "tijera") {
+            console.log("Perdiste");
+            resultado = "Perdiste";
+          } else {
+            console.log("Ganaste");
+            resultado = "Ganaste";
+          }
+        } else if (usuario == "tijera") {
+          if (jugadorAI == "piedra") {
+            console.log("Perdiste");
+            resultado = "Perdiste";
+          } else {
+            console.log("Ganaste");
+            resultado = "Ganaste";
+          }
+        }
+
+        // Stats de los Jugadores
+        if (usuario == "piedra") {
+          gameScore.stats.user_piedra++;
+        }
+        if (usuario == "papel") {
+          gameScore.stats.user_papel++;
+        }
+        if (usuario == "tijera") {
+          gameScore.stats.user_tijera++;
+        }
+        if (jugadorAI == "piedra") {
+          gameScore.stats.ai_piedra++;
+        }
+        if (jugadorAI == "papel") {
+          gameScore.stats.ai_papel++;
+        }
+        if (jugadorAI == "tijera") {
+          gameScore.stats.ai_tijera++;
+        }
+
+        // Score
+        if (resultado == "Empate") {
+          gameScore.empatadas++;
+        }
+        if (resultado == "Perdiste") {
+          gameScore.perdidas++;
+        }
+        if (resultado == "Ganaste") {
+          gameScore.ganadas++;
+        }
+
+        txtResultado.innerHTML = `<h1>${resultado}</h1>Tu has tirado <b>${usuario.toUpperCase()}</b> y la AI ha tirado <b>${jugadorAI.toUpperCase()}</b>.`;
+
+        showScore();
+      };
+
+
+
+      /** Esta función coge de las opciones una al azar y la devuelve:
+       *  @return {string} - ej: piedra / papel / tijera
+       * elegirJugadorAI -> eleccionAI , esta función fue renombrada a eleccionAI
+       */
+
+      const eleccionAI = () => {
+        const opciones = ["piedra", "papel", "tijera"];
+        const numero = Math.floor(Math.random() * opciones.length);
+        return opciones[numero];
+      };
+
+
+
+      /** Esta función ejecuta el autoPlay por eso ha sido reenombrada de AIvsAI a autoPlay
+       * (1) setInterval quiere obtener un numero radom entre 0 y 2 que es el length del array. Con math.floor redondear "hacia el floor" es decir a la baja.
+       * (2) En const usuario, elige el valor del usuario (al final esta jugando contra si misma pero necesita un contricante) e iniciar el juego por eso llama a jugar(usuario);
+       * (3)  setInterval( function ,100 ); tiene en realidad dos argumentos una funcion y un 100, la funcion se ejecuta cada 100 milisegundos
+       */
+      const autoPlay = () => {
+        setInterval(function () {
+          const numero = Math.floor(Math.random() * opciones.length); //.random va a multiplicar un numero random entre 0 y 2
+          const usuario = opciones[numero];
+          jugar(usuario);
+        }, 1000);
+      };
+
+
+
+      /** Esta función muestra información sobre el Score o puntuación de las partidas.
+       * (1) Antes de iniciar la partida modifica el HTML para informarnos de que: Ganadas / Perdidas / Empatadas están a Cero
+       * (2) Después de haber iniciado la partida y de obtener los primeros resultados: modifica el HTML añadiendo para cada usuario un título h3 y un resumen cuántas veces su elección ha sido piedra, papel o tijera
+       */
+      const showScore = () => {
+        txtGanadas.innerHTML = gameScore.ganadas;
+        txtPerdidas.innerHTML = gameScore.perdidas;
+        txtEmpatadas.innerHTML = gameScore.empatadas;
+
+        txtStats.innerHTML = `<p> <h3> AI: </h3> ✊x${gameScore.stats.ai_piedra} ✋x${gameScore.stats.ai_papel} ✌x${gameScore.stats.ai_tijera}</p>
+                              <p> <h3> Usuario: </h3> ✊x${gameScore.stats.user_piedra} ✋x${gameScore.stats.user_papel} ✌x${gameScore.stats.user_tijera}</p>`;
+        graficar();
+      };
+
+
+
+      /** Graficar recibe los nuevos resultados e imprime en pantalla una nueva versión de la grafica, la va actualizando a medida que recibe nuevos valores.  
+       * (1) La funcion tb calcula el porcentaje de ganadas y perdidas
+       * (2) Nombra unas constantes, guardando en ellas la parte de la grafica que contiene los divs rojo y azul (de ganadas y perdidas)
+       * (3) Usa esas constantes y por tanto esos divs, para añadir sobre ellos textoHTML: el porcentaje redondeado y escrito sobre el div
+       * (4) Modifica el ancho de los divs rojos y azul, ej. Si se ha ganado más: el div rojo se ensanchará al porcentaje adecuado
+       
+       * Nota: Esta función se reutiliza en otras funciones ya que es útil para actualizar la gráfica en cada interaccion
+      */
+      const graficar = () => {
+        const total = gameScore.ganadas + gameScore.perdidas; // +gameScore.empatadas;
+        const porcentajeGanadas = (gameScore.ganadas / total) * 100;
+        const porcentajePerdidas = (gameScore.perdidas / total) * 100;
+        //const porcentajeEmpatadas=(gameScore.empatadas/total)*100;
+
+        const divGanadas = document.querySelector(
+          ".graficaGanadas:nth-child(1)"
+        );
+        const divPerdidas = document.querySelector(
+          ".graficaPerdidas:nth-child(2)"
+        );
+
+        divGanadas.innerHTML =
+          "Ganadas: " + Math.round(porcentajeGanadas) + "%";
+        divPerdidas.innerHTML =
+          "Perdidas: " + Math.round(porcentajePerdidas) + "%";
+        divGanadas.style.width = porcentajeGanadas + "%";
+        divPerdidas.style.width = porcentajePerdidas + "%";
+      };
+    </script>
+  </body>
+</html>
