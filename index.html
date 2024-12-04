@@ -20,7 +20,7 @@
         text-align: center;
       }
 
-      .graficaAccion {
+      .graficaActiva {
         color: white;
         width: 0%;
         transition: width 1s;
@@ -32,6 +32,10 @@
 
       .graficaPerdidas {
         background: blue;
+      }
+
+      .graficaEmpatadas {
+        background: rgb(16, 134, 61);
       }
     </style>
   </head>
@@ -54,8 +58,9 @@
 
     <h2>Gráfica:</h2>
     <div class="graficaBase">
-      <div class="graficaAccion graficaGanadas">Ganadas</div>
-      <div class="graficaAccion graficaPerdidas">Perdidas</div>
+      <div class="graficaActiva graficaGanadas">Ganadas</div>
+      <div class="graficaActiva graficaPerdidas">Perdidas</div>
+      <div class="graficaActiva graficaEmpatadas">Empatadas</div>
     </div>
     <hr/>
 
@@ -64,6 +69,18 @@
     <hr/>
 
     <script>
+      const opciones = ["piedra", "papel", "tijera"];
+      const btnPiedra = document.querySelector(".btnPiedra");
+      const btnPapel = document.querySelector(".btnPapel");
+      const btnTijera = document.querySelector(".btnTijera");
+
+      btnPiedra.addEventListener("click", () => {jugar("piedra");});
+      btnPapel.addEventListener("click", () => {jugar("papel");});
+      btnTijera.addEventListener("click", () => {jugar("tijera");});
+
+      const btnAutoplay = document.querySelector(".btnAutoplay");
+      btnAutoplay.addEventListener("click", () => { autoPlay();});
+
       const txtGanadas = document.getElementById("ganadas");
       const txtPerdidas = document.getElementById("perdidas");
       const txtEmpatadas = document.getElementById("empatadas");
@@ -85,26 +102,6 @@
         },
       };
 
-      const opciones = ["piedra", "papel", "tijera"];
-      const btnPiedra = document.querySelector(".btnPiedra");
-      const btnPapel = document.querySelector(".btnPapel");
-      const btnTijera = document.querySelector(".btnTijera");
-
-      btnPiedra.addEventListener("click", () => {
-        jugar("piedra");
-      });
-      btnPapel.addEventListener("click", () => {
-        jugar("papel");
-      });
-      btnTijera.addEventListener("click", () => {
-        jugar("tijera");
-      });
-
-      const btnAutoplay = document.querySelector(".btnAutoplay");
-      btnAutoplay.addEventListener("click", () => {
-        autoPlay();
-      });
-
       const btnReset = document.querySelector(".btnReset");
       btnReset.addEventListener("click", () => {
         gameScore.ganadas = 0;
@@ -124,86 +121,46 @@
 
       console.log("text body: ", document.body.innerText);
 
-
-      
       /**Esta es la función más importante del código,
        * (1) Dependiendo de los resultados de jugadorAI y el usuario, para determinar quien de los dos gana o si empatan
        * La función evalua estos resultados a través de condicionales.
        * (2) Actualiza las estadísticas de los jugadores (Stats)
        * (3) Imprime un texto HTML con el resumen de la partida: el resultado (Score) y qué ha tirado cada jugador
+       * Para optimizar el primer bloque de condicionales  he usado operador ternario. El console log va al final del bloque con el objetivo de mejorar la legibilidad de las condiciones y no andar repitiendolo
        */
 
       const jugar = (usuario) => {
-        const jugadorAI = eleccionAI(); // devuelve piedra, papel o tijera
 
+        const jugadorAI = eleccionAI(); // devuelve piedra, papel o tijera
         let resultado = "";
 
-        if (jugadorAI == usuario) {
-          console.log("Empate");
-          resultado = "Empate";
-        } else if (usuario == "piedra") {
-          if (jugadorAI == "papel") {
-            console.log("Perdiste");
-            resultado = "Perdiste";
-          } else {
-            console.log("Ganaste");
-            resultado = "Ganaste";
-          }
-        } else if (usuario == "papel") {
-          if (jugadorAI == "tijera") {
-            console.log("Perdiste");
-            resultado = "Perdiste";
-          } else {
-            console.log("Ganaste");
-            resultado = "Ganaste";
-          }
-        } else if (usuario == "tijera") {
-          if (jugadorAI == "piedra") {
-            console.log("Perdiste");
-            resultado = "Perdiste";
-          } else {
-            console.log("Ganaste");
-            resultado = "Ganaste";
-          }
-        }
+        if (jugadorAI == usuario) {resultado = "Empate";} 
+        else if (usuario == "piedra") {resultado = (jugadorAI == "papel") ? "Perdiste" : "Ganaste"; }
+        else if (usuario == "papel") {resultado = (jugadorAI == "tijera") ? "Perdiste" : "Ganaste"; }
+        else if (usuario == "tijera") {resultado = (jugadorAI == "piedra") ? "Perdiste" : "Ganaste"; }
+        
+        console.log(resultado);
+
 
         // Stats de los Jugadores
-        if (usuario == "piedra") {
-          gameScore.stats.user_piedra++;
-        }
-        if (usuario == "papel") {
-          gameScore.stats.user_papel++;
-        }
-        if (usuario == "tijera") {
-          gameScore.stats.user_tijera++;
-        }
-        if (jugadorAI == "piedra") {
-          gameScore.stats.ai_piedra++;
-        }
-        if (jugadorAI == "papel") {
-          gameScore.stats.ai_papel++;
-        }
-        if (jugadorAI == "tijera") {
-          gameScore.stats.ai_tijera++;
-        }
+        if (usuario == "piedra") {gameScore.stats.user_piedra++;}
+        if (usuario == "papel") {gameScore.stats.user_papel++;}
+        if (usuario == "tijera") {gameScore.stats.user_tijera++;}
+
+        if (jugadorAI == "piedra") {gameScore.stats.ai_piedra++;}
+        if (jugadorAI == "papel") {gameScore.stats.ai_papel++;}
+        if (jugadorAI == "tijera") {gameScore.stats.ai_tijera++;}
 
         // Score
-        if (resultado == "Empate") {
-          gameScore.empatadas++;
-        }
-        if (resultado == "Perdiste") {
-          gameScore.perdidas++;
-        }
-        if (resultado == "Ganaste") {
-          gameScore.ganadas++;
-        }
+        if (resultado == "Empate") {gameScore.empatadas++;}
+        if (resultado == "Perdiste") {gameScore.perdidas++;}
+        if (resultado == "Ganaste") {gameScore.ganadas++; }
 
-        txtResultado.innerHTML = `<h1>${resultado}</h1>Tu has tirado <b>${usuario.toUpperCase()}</b> y la AI ha tirado <b>${jugadorAI.toUpperCase()}</b>.`;
-
+        txtResultado.innerHTML = 
+        `<h1>${resultado}</h1>Tu has tirado <b>${usuario.toUpperCase()}</b> 
+        y la AI ha tirado <b>${jugadorAI.toUpperCase()}</b>.`;
         showScore();
       };
-
-
 
       /** Esta función coge de las opciones una al azar y la devuelve:
        *  @return {string} - ej: piedra / papel / tijera
@@ -215,8 +172,6 @@
         const numero = Math.floor(Math.random() * opciones.length);
         return opciones[numero];
       };
-
-
 
       /** Esta función ejecuta el autoPlay por eso ha sido reenombrada de AIvsAI a autoPlay
        * (1) setInterval quiere obtener un numero radom entre 0 y 2 que es el length del array. Con math.floor redondear "hacia el floor" es decir a la baja.
@@ -231,8 +186,6 @@
         }, 1000);
       };
 
-
-
       /** Esta función muestra información sobre el Score o puntuación de las partidas.
        * (1) Antes de iniciar la partida modifica el HTML para informarnos de que: Ganadas / Perdidas / Empatadas están a Cero
        * (2) Después de haber iniciado la partida y de obtener los primeros resultados: modifica el HTML añadiendo para cada usuario un título h3 y un resumen cuántas veces su elección ha sido piedra, papel o tijera
@@ -242,40 +195,47 @@
         txtPerdidas.innerHTML = gameScore.perdidas;
         txtEmpatadas.innerHTML = gameScore.empatadas;
 
-        txtStats.innerHTML = `<p> <h3> AI: </h3> ✊x${gameScore.stats.ai_piedra} ✋x${gameScore.stats.ai_papel} ✌x${gameScore.stats.ai_tijera}</p>
-                              <p> <h3> Usuario: </h3> ✊x${gameScore.stats.user_piedra} ✋x${gameScore.stats.user_papel} ✌x${gameScore.stats.user_tijera}</p>`;
+        txtStats.innerHTML = 
+        `<p> <h3> AI: </h3> 
+        ✊x${gameScore.stats.ai_piedra} ✋x${gameScore.stats.ai_papel} ✌x${gameScore.stats.ai_tijera}</p>
+        <p> <h3> Usuario: </h3> 
+        ✊x${gameScore.stats.user_piedra} ✋x${gameScore.stats.user_papel} ✌x${gameScore.stats.user_tijera}</p>`;
         graficar();
       };
 
-
-
       /** Graficar recibe los nuevos resultados e imprime en pantalla una nueva versión de la grafica, la va actualizando a medida que recibe nuevos valores.  
        * (1) La funcion tb calcula el porcentaje de ganadas y perdidas
-       * (2) Nombra unas constantes, guardando en ellas la parte de la grafica que contiene los divs rojo y azul (de ganadas y perdidas)
+       * (2) Nombra unas constantes, guardando en ellas la parte de la grafica que contiene los divs rojo, azul y verde (respectivamente: ganadas, perdidas y empatadas)
        * (3) Usa esas constantes y por tanto esos divs, para añadir sobre ellos textoHTML: el porcentaje redondeado y escrito sobre el div
-       * (4) Modifica el ancho de los divs rojos y azul, ej. Si se ha ganado más: el div rojo se ensanchará al porcentaje adecuado
-       
-       * Nota: Esta función se reutiliza en otras funciones ya que es útil para actualizar la gráfica en cada interaccion
+       * (4) Modifica el ancho de los divs rojo azul y verde, ej. Si se ha ganado más: el div rojo se ensanchará al porcentaje adecuado
+       * (5) En caso de que se pulse reset y/o el total esté en cero, la grafica cambiará el ancho de los divs al minimo, dejando ver el div de .graficaBAse con fondo gris. Además se modifica el texto, informando de que los porcentajes están al 0% y por tanto no se han realizado partidas.
+       * Nota: Esta función se reutiliza en la anterior funcion (showScore) ya que es útil para actualizar la gráfica en cada interaccion
       */
       const graficar = () => {
-        const total = gameScore.ganadas + gameScore.perdidas; // +gameScore.empatadas;
+        const divGanadas = document.querySelector(".graficaGanadas:nth-child(1)");
+        const divPerdidas = document.querySelector(".graficaPerdidas:nth-child(2)");
+        const divEmpatadas = document.querySelector(".graficaEmpatadas:nth-child(3)");
+
+        const total = gameScore.ganadas + gameScore.perdidas + gameScore.empatadas;
+
         const porcentajeGanadas = (gameScore.ganadas / total) * 100;
         const porcentajePerdidas = (gameScore.perdidas / total) * 100;
-        //const porcentajeEmpatadas=(gameScore.empatadas/total)*100;
+        const porcentajeEmpatadas = (gameScore.empatadas / total) * 100;
 
-        const divGanadas = document.querySelector(
-          ".graficaGanadas:nth-child(1)"
-        );
-        const divPerdidas = document.querySelector(
-          ".graficaPerdidas:nth-child(2)"
-        );
-
-        divGanadas.innerHTML =
-          "Ganadas: " + Math.round(porcentajeGanadas) + "%";
-        divPerdidas.innerHTML =
-          "Perdidas: " + Math.round(porcentajePerdidas) + "%";
+        divGanadas.innerHTML = "Ganadas: " + Math.round(porcentajeGanadas) + "%";
+        divPerdidas.innerHTML = "Perdidas: " + Math.round(porcentajePerdidas) + "%";
+        divEmpatadas.innerHTML = "Empatadas: " + Math.round(porcentajeEmpatadas) + "%";
         divGanadas.style.width = porcentajeGanadas + "%";
         divPerdidas.style.width = porcentajePerdidas + "%";
+        divEmpatadas.style.width = porcentajeEmpatadas + "%";
+
+        if (total === 0) {
+        divGanadas.style.width = "0%";
+        divPerdidas.style.width = "0%";
+        divEmpatadas.style.width = "0%";
+        divGanadas.innerHTML = "Ganadas: 0%";
+        divPerdidas.innerHTML = "Perdidas: 0%";
+        divEmpatadas.innerHTML = "Empatadas: 0%";}
       };
     </script>
   </body>
